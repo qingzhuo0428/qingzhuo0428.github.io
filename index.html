@@ -244,7 +244,9 @@
 
   <div class="money">
     <h3>钱</h3>
-    <div class="money-row"><label>本月收入</label><input type="number" inputmode="decimal" id="mIncome" placeholder="填一下"></div>
+    <div class="stats-sum" id="incomeSum"></div>
+    <div id="incomeList"></div>
+    <button class="stats-add" id="btnAddIncome">＋ 记一笔收入</button>
   </div>
 
   <div class="stats">
@@ -297,8 +299,8 @@
   ];
   function migrate(d) {
     if (!d) return null;
-    if (d.version === 4) return d;
-    d.version = 4;
+    if (d.version === 5) return d;
+    d.version = 5;
     (d.events || []).forEach(function (ev) {
       if (!ev.weight) ev.weight = 'light';
       // v2 迁移 bug 修复：三个重点项目按标题识别，恢复 heavy + 开工日
@@ -312,11 +314,12 @@
       }
     });
     if (!d.stats) d.stats = [];
+    if (!d.incomes) d.incomes = [];
     return d;
   }
 
   var SEED = {
-    version: 4,
+    version: 5,
     events: [
       { id: 'e1', title: '五险一金', type: 'expense', day: 20, repeat: 'monthly', weight: 'light' },
       { id: 'e2', title: '房租', type: 'expense', day: 30, repeat: 'monthly', weight: 'light' },
@@ -326,6 +329,7 @@
       { id: 'e6', title: 'GTA6 · 视频上线', type: 'game', date: '2026-11-19', startDate: '2026-11-05', weight: 'heavy' }
     ],
     money: { balance: '', goal: '', per: '' },
+    incomes: [],
     stats: []
   };
 
@@ -592,11 +596,17 @@
       var sub = ev.startDate
         ? '开工 ' + fmtShort(ev.startDate) + ' → 截稿 ' + fmtShort(ev.date)
         : '截稿 ' + fmtShort(ev.date);
+      var sub2 = '';
+      if (ev.startDate) {
+        var span = Math.round((parseStr(ev.date) - parseStr(ev.startDate)) / 86400000);
+        if (span >= 0) sub2 = '（共 ' + span + ' 天）';
+      }
       html +=
         '<div class="proj-card' + (d.urgent ? ' urgent' : '') + '" data-id="' + ev.id + '">' +
         '<div class="proj-dot" style="background:' + color + '"></div>' +
         '<div class="proj-body"><div class="proj-title">' + escapeHTML(ev.title) + '</div>' +
-        '<div class="proj-sub">' + sub + '</div></div>' +
+        '<div class="proj-sub">' + sub + '</div>' +
+        (sub2 ? '<div class="proj-sub">' + sub2 + '</div>' : '') + '</div>' +
         '<div class="proj-count">' + leftHTML + '</div></div>';
     });
     box.innerHTML = html;
@@ -656,8 +666,43 @@
   }
 
   function renderMoney() {
-    var m = state.money || { income: '' };
-    document.getElementById('mIncome').value = m.income;
+    if (!state.incomes) state.incomes = [];
+    var sumEl = document.getElementById('incomeSum');
+    var listEl = document.getElementById('incomeList');
+    var year = now0().getFullYear();
+    var monthKey = todayStr().slice(0, 7);
+    function sumOf(list) { var t = 0; list.forEach(function (r) { t += (+r.amount || 0); }); return t; }
+    var thisYear = state.incomes.filter(function (r) { return (r.date || '').slice(0, 4) === String(year); });
+    var thisMonth = thisYear.filter(function (r) { return (r.date || '').slice(0, 7) === monthKey; });
+    var mo = sumOf(thisMonth), yr = sumOf(thisYear);
+    sumEl.innerHTML =
+      '<div class="stat-chip"><div class="k">本月收入</div><div class="v">' + (mo ? fmtMoney(mo) : '—') + '</div></div>' +
+      '<div class="stat-chip"><div class="k">今年收入</div><div class="v">' + (yr ? fmtMoney(yr) : '—') + '</div></div>';
+    if (!state.incomes.length) { listEl.innerHTML = ''; return; }
+    var groups = {};
+    state.incomes.forEach(function (r) { var k = (r.date || '').slice(0, 7); (groups[k] = groups[k] || []).push(r); });
+    var keys = Object.keys(groups).sort().reverse();
+    var html = '';
+    keys.forEach(function (k) {
+      var g = groups[k];
+      var label = k.slice(0, 4) === String(year) ? (+k.slice(5, 7)) + '月' : k.slice(0, 4) + '年' + (+k.slice(5, 7)) + '月';
+      html += '<div class="stat-month">' + label + ' · ' + fmtMoney(sumOf(g)) + '</div>';
+      g.sort(function (a, b) { return (b.date || '') < (a.date || '') ? -1 : 1; });
+      g.forEach(function (r) {
+        var sub = fmtShort(r.date) + (r.note ? ' · ' + escapeHTML(r.note) : '');
+        html += '<div class="stat-item" data-id="' + r.id + '">' +
+          '<div class="si-main"><div class="si-title">' + escapeHTML(r.type || '收入') + '</div><div class="si-sub">' + sub + '</div></div>' +
+          '<div class="si-val">+' + fmtMoney(r.amount) + '</div></div>';
+      });
+    });
+    listEl.innerHTML = html;
+    listEl.querySelectorAll('.stat-item').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var id = el.getAttribute('data-id');
+        var r = state.incomes.find(function (x) { return x.id === id; });
+        if (r) openIncomeViewSheet(r);
+      });
+    });
   }
 
   // ---------- 弹层 ----------
@@ -878,12 +923,59 @@
     });
   }
 
-  // ---------- 钱 ----------
-  document.getElementById('mIncome').addEventListener('input', function () {
-    state.money = state.money || {};
-    state.money.income = this.value;
-    save();
-  });
+  // ---------- 钱（收入记录） ----------
+  var INCOME_TYPES = ['外稿', '商单', '平台收益', '其他'];
+  function openIncomeViewSheet(r) {
+    openSheet(
+      '<h2>' + escapeHTML(r.type || '收入') + '</h2>' +
+      '<div class="mini-title">' + fmtDate(r.date) + ' · +' + fmtMoney(r.amount) + (r.note ? ' · ' + escapeHTML(r.note) : '') + '</div>' +
+      '<div class="sheet-actions"><button class="btn-ghost" id="ivDel">删除</button>' +
+      '<button class="btn-main" id="ivClose">关闭</button></div>'
+    );
+    document.getElementById('ivClose').addEventListener('click', closeSheet);
+    document.getElementById('ivDel').addEventListener('click', function () {
+      state.incomes = state.incomes.filter(function (x) { return x.id !== r.id; });
+      save(); closeSheet(); render(); toast('已删除');
+    });
+  }
+  function openIncomeAddSheet() {
+    openSheet(
+      '<h2>记一笔收入</h2>' +
+      '<div class="field"><label>类型（选一个，或选"其他"自己填）</label><div class="type-row" id="ikRow">' +
+      INCOME_TYPES.map(function (t, i) { return '<button class="type-chip' + (i === 0 ? ' on' : '') + '" data-t="' + t + '">' + t + '</button>'; }).join('') +
+      '</div></div>' +
+      '<div class="field" id="ikCustomWrap" style="display:none"><label>类型名（自己填）</label><input type="text" id="ikCustom" placeholder="如：兼职 / 转账 / 退款"></div>' +
+      '<div class="field"><label>金额（元）</label><input type="number" inputmode="decimal" id="ifA" placeholder="如 1500"></div>' +
+      '<div class="field"><label>日期</label><input type="date" id="ifD" value="' + todayStr() + '"></div>' +
+      '<div class="field"><label>备注（可空）</label><input type="text" id="ifN" placeholder="如：书单外稿 / 某商单尾款"></div>' +
+      '<div class="sheet-actions"><button class="btn-main" id="ifSave">记下</button>' +
+      '<button class="btn-ghost gray" id="ifCancel">取消</button></div>'
+    );
+    var selType = INCOME_TYPES[0];
+    sheet.querySelectorAll('#ikRow .type-chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        selType = b.getAttribute('data-t');
+        sheet.querySelectorAll('#ikRow .type-chip').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        document.getElementById('ikCustomWrap').style.display = selType === '其他' ? 'block' : 'none';
+      });
+    });
+    document.getElementById('ifCancel').addEventListener('click', closeSheet);
+    document.getElementById('ifSave').addEventListener('click', function () {
+      var amount = +document.getElementById('ifA').value || 0;
+      if (!amount) { toast('金额填一下'); return; }
+      var dv = document.getElementById('ifD').value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dv)) { toast('日期不对'); return; }
+      var t = selType;
+      if (t === '其他') {
+        var c = document.getElementById('ikCustom').value.trim();
+        if (c) t = c;
+      }
+      state.incomes.push({ id: 'i' + Date.now(), date: dv, type: t, amount: amount, note: document.getElementById('ifN').value.trim() });
+      save(); closeSheet(); render(); toast('记下了');
+    });
+  }
+  document.getElementById('btnAddIncome').addEventListener('click', openIncomeAddSheet);
 
   // ---------- 累计 ----------
   var STAT_KINDS = { article: '稿子', video: '视频', money: '挣钱' };
