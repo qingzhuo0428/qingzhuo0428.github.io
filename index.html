@@ -244,10 +244,7 @@
 
   <div class="money">
     <h3>钱</h3>
-    <div class="money-row"><label>现在还剩</label><input type="number" inputmode="decimal" id="mBalance" placeholder="填一下"></div>
-    <div class="money-row"><label>每月要挣</label><input type="number" inputmode="decimal" id="mGoal" placeholder="填一下"></div>
-    <div class="money-row"><label>一篇外稿</label><input type="number" inputmode="decimal" id="mPer" placeholder="填一下"></div>
-    <div class="money-note" id="moneyNote">这三个数字只存在你自己手机上。填完自动帮你算。</div>
+    <div class="money-row"><label>本月收入</label><input type="number" inputmode="decimal" id="mIncome" placeholder="填一下"></div>
   </div>
 
   <div class="stats">
@@ -659,27 +656,8 @@
   }
 
   function renderMoney() {
-    var m = state.money || { balance: '', goal: '', per: '' };
-    document.getElementById('mBalance').value = m.balance;
-    document.getElementById('mGoal').value = m.goal;
-    document.getElementById('mPer').value = m.per;
-    renderMoneyNote();
-  }
-  function renderMoneyNote() {
-    var m = state.money || {};
-    var note = document.getElementById('moneyNote');
-    var g = parseFloat(m.goal), p = parseFloat(m.per), b = parseFloat(m.balance);
-    if (g > 0 && p > 0) {
-      var n = Math.ceil(g / p);
-      var txt = '每月要挣 ' + g + ' 元 ÷ 一篇 ' + p + ' 元 ≈ 每月 ' + n + ' 篇外稿';
-      if (!isNaN(b) && b >= 0) {
-        var months = b / g;
-        txt += '；余额能撑约 ' + (months < 1 ? months.toFixed(1) : Math.round(months)) + ' 个月';
-      }
-      note.textContent = txt;
-    } else {
-      note.textContent = '这三个数字只存在你自己手机上。填完自动帮你算：每月几篇外稿够用。';
-    }
+    var m = state.money || { income: '' };
+    document.getElementById('mIncome').value = m.income;
   }
 
   // ---------- 弹层 ----------
@@ -901,14 +879,10 @@
   }
 
   // ---------- 钱 ----------
-  ['mBalance', 'mGoal', 'mPer'].forEach(function (id) {
-    document.getElementById(id).addEventListener('input', function () {
-      state.money = state.money || {};
-      var k = id === 'mBalance' ? 'balance' : (id === 'mGoal' ? 'goal' : 'per');
-      state.money[k] = this.value;
-      save();
-      renderMoneyNote();
-    });
+  document.getElementById('mIncome').addEventListener('input', function () {
+    state.money = state.money || {};
+    state.money.income = this.value;
+    save();
   });
 
   // ---------- 累计 ----------
@@ -947,7 +921,7 @@
       '<div class="stat-chip"><div class="k">今年累计</div><div class="v">' + escapeHTML(aggText(y)) + '</div></div>' +
       '<div class="stat-chip"><div class="k">本月</div><div class="v">' + escapeHTML(aggText(mo)) + '</div></div>';
     if (!state.stats.length) {
-      listEl.innerHTML = '<div class="stats-empty">还没有记录。写完一篇稿、做完一个视频、挣到一笔钱，都值得记下来——像游戏战绩一样攒着。</div>';
+      listEl.innerHTML = '';
       return;
     }
     // 按月分组（倒序）
