@@ -606,10 +606,23 @@ try {
 }
 
 window.onerror = function(msg, url, line, col, err){
+  // 微信内置浏览器会注入外部脚本，出错时只有 "Script error. line 0"，没有调用栈
+  // 这类错误我们没法修，也不该用红框拦截用户；只记录到控制台
+  const isExternal = msg === "Script error." || line === 0;
+  if (isExternal){
+    console.warn("[external script error ignored]", {msg, url, line, col, err});
+    return false;
+  }
   showErr(msg + " (line " + line + ":" + col + ")", err);
 };
 window.onunhandledrejection = function(e){
-  showErr("未处理 Promise: " + (e.reason && e.reason.message ? e.reason.message : String(e.reason)), e.reason);
+  const reason = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+  // 同上的外部脚本 Promise 拒绝，静默忽略
+  if (reason === "Script error."){
+    console.warn("[external rejection ignored]", e.reason);
+    return false;
+  }
+  showErr("未处理 Promise: " + reason, e.reason);
 };
 </script>
 </body>
