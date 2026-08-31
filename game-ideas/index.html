@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵感素材库 · 游戏内容向</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --ink: #1f1e1c;
+    --ink-2: #6b6761;
+    --ink-3: #9b968f;
+    --line: #e8e5e0;
+    --accent: #b3382c;
+    --accent-soft: #f6e9e6;
+    --ok: #3f7d5a;
+    --warn: #c0781f;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+    padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header { margin-bottom: 24px; }
+  .kicker {
+    font-size: 12px; letter-spacing: .18em; color: var(--ink-3);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  h1 { font-size: 26px; font-weight: 650; letter-spacing: .02em; }
+  .sub { color: var(--ink-2); font-size: 14px; margin-top: 6px; }
+
+  .stats { display: flex; gap: 10px; margin: 18px 0 22px; flex-wrap: wrap; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 7px 15px; font-size: 13px; color: var(--ink-2);
+    display: flex; gap: 8px; align-items: baseline;
+  }
+  .stat b { font-size: 17px; color: var(--ink); font-weight: 650; }
+  .stat.hot b { color: var(--accent); }
+
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+  .btn {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .88; }
+  .btn.ghost {
+    background: transparent; color: var(--ink-2); border: 1px solid var(--line);
+    font-weight: 500;
+  }
+  .btn.ghost:hover { background: var(--card); color: var(--ink); }
+  .search { flex: 1; min-width: 200px; display: flex; }
+  .search input {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 14px; font-size: 14px; background: var(--card); color: var(--ink);
+    outline: none;
+  }
+  .search input:focus { border-color: var(--accent); }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab {
+    border: 1px solid var(--line); background: transparent; color: var(--ink-2);
+    border-radius: 999px; padding: 5px 14px; font-size: 13px; cursor: pointer;
+    transition: all .15s;
+  }
+  .tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .tab .n { opacity: .6; font-size: 12px; margin-left: 4px; }
+
+  .cards { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 15px 18px; box-shadow: var(--shadow);
+  }
+  .card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .f-badge {
+    font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 6px;
+    letter-spacing: .06em; flex-shrink: 0;
+  }
+  .f-series { background: #eae6f5; color: #5b4a94; }
+  .f-single { background: var(--accent-soft); color: var(--accent); }
+  .f-future { background: #e4efe7; color: var(--ok); }
+  .card-title { font-size: 16px; font-weight: 650; }
+  .card-actions { margin-left: auto; display: flex; gap: 4px; }
+  .mini-btn {
+    background: transparent; border: 1px solid transparent; color: var(--ink-3);
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer;
+    transition: all .15s;
+  }
+  .mini-btn:hover { color: var(--ink); border-color: var(--line); background: var(--bg); }
+  .mini-btn.danger:hover { color: var(--accent); border-color: #efd5d0; background: var(--accent-soft); }
+
+  .card-body { margin-top: 7px; font-size: 13.5px; color: var(--ink-2); white-space: pre-wrap; }
+  .card-foot { margin-top: 9px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tag {
+    font-size: 11.5px; padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap;
+  }
+  .tag.node { background: #f7ecd9; color: var(--warn); border-color: transparent; font-weight: 500; }
+  .tag.series-of { background: #f0edf8; color: #5b4a94; border-color: transparent; }
+  .tag.status { background: var(--bg); }
+  .tag.status.ready { background: #e4efe7; color: var(--ok); border-color: transparent; }
+
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--ink-3); font-size: 14px;
+    border: 1px dashed var(--line); border-radius: 12px;
+  }
+  .empty b { display: block; font-size: 16px; color: var(--ink-2); margin-bottom: 6px; }
+
+  /* modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(30,28,26,.4);
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 50px 16px; overflow-y: auto; z-index: 10;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 14px; max-width: 640px; width: 100%;
+    padding: 26px 28px; box-shadow: 0 12px 40px rgba(0,0,0,.18);
+  }
+  .modal h2 { font-size: 18px; margin-bottom: 18px; font-weight: 650; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; font-weight: 500; }
+  .field input, .field textarea, .field select {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 12px; font-size: 14px; font-family: inherit; color: var(--ink);
+    background: var(--bg); outline: none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); background: var(--card); }
+  .field textarea { min-height: 80px; resize: vertical; }
+
+  .forms { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .form-opt {
+    flex: 1; min-width: 120px; border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; cursor: pointer; text-align: left; background: var(--bg);
+    transition: all .15s;
+  }
+  .form-opt .t { font-size: 14px; font-weight: 650; display: block; }
+  .form-opt .d { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; display: block; }
+  .form-opt.active { border-color: var(--accent); background: var(--accent-soft); }
+  .form-opt.active .t { color: var(--accent); }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink-2);
+    border-radius: 999px; padding: 4px 13px; font-size: 12.5px; cursor: pointer;
+    transition: all .15s;
+  }
+  .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip-custom { margin-top: 8px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; padding: 10px 22px; border-radius: 999px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  footer { margin-top: 40px; text-align: center; font-size: 12px; color: var(--ink-3); }
+  .tip {
+    background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--warn);
+    border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--ink-2);
+    margin-bottom: 18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Idea Bank</div>
+    <h1>灵感素材库 · 游戏内容向</h1>
+    <div class="sub">一句话、一个系列、一个还没发售的游戏——先记下来，养着。标题和主体不知道也没关系。</div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <div class="search">
+      <input id="q" type="text" placeholder="搜标题 / 内容 / 标签…" autocomplete="off">
+    </div>
+    <button class="btn" id="addBtn">＋ 丢一条灵感</button>
+    <button class="btn ghost" id="exportBtn">备份</button>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="cards" id="cards"></div>
+
+  <footer>数据存在本机浏览器，清缓存前记得「备份」。每月导一次存网盘。 · 已核实：地铁2039 → 2027-02，P4重制 → 2027-02-18，黑神话钟馗 → 已官宣待定</footer>
+</div>
+
+<!-- 表单弹窗 -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">丢一条灵感</h2>
+    <form id="form">
+      <div class="forms" id="formSelect">
+        <div class="form-opt" data-f="series">
+          <span class="t">系列</span>
+          <span class="d">一个能套很多游戏的框架</span>
+        </div>
+        <div class="form-opt active" data-f="single">
+          <span class="t">单点灵感</span>
+          <span class="d">一句话论点，主体还没想好</span>
+        </div>
+        <div class="form-opt" data-f="future">
+          <span class="t">未来游戏</span>
+          <span class="d">绑定某个还没发售的游戏</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="titleLabel">一句话灵感</label>
+        <input id="title" placeholder="如：为什么转场要闪白" maxlength="80">
+      </div>
+      <div class="field">
+        <label id="bodyLabel">延伸想法（想到什么写什么）</label>
+        <textarea id="body" placeholder="可能的角度、候选、素材、标题备选……可以完全不成形"></textarea>
+      </div>
+
+      <div class="field">
+        <label>标签（点选 + 自定义）</label>
+        <div class="chips" id="chips"></div>
+        <input class="chip-custom" id="customTags" placeholder="自定义标签，逗号分隔，如：民俗, 翻译腔" maxlength="60">
+      </div>
+
+      <div class="row2">
+        <div class="field" id="nodeField">
+          <label>节点（发售 / 热点时间）</label>
+          <input id="node" placeholder="如 2027-02-18 · P4重制" maxlength="40">
+        </div>
+        <div class="field" id="seriesField">
+          <label>归属系列（可选）</label>
+          <select id="seriesOf"><option value="">— 不归属 —</option></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>状态</label>
+        <select id="status">
+          <option value="idea" selected>灵感中（只是个念头）</option>
+          <option value="dig">待深挖（有戏，但要研究）</option>
+          <option value="ready">可以做了（随时能开工）</option>
+          <option value="done">已做（发布了 / 用过了）</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="cancelBtn">取消</button>
+        <button type="submit" class="btn">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="global-err" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#b3382c;color:#fff;padding:14px 22px;border-radius:12px;font-size:13px;max-width:80%;z-index:30;box-shadow:0 8px 30px rgba(0,0,0,.2);line-height:1.6;"></div>
+
+<script>
+const KEY = "game-idea-bank-v2";
+const FORMS = [["series", "系列", "f-series"], ["single", "单点灵感", "f-single"], ["future", "未来游戏", "f-future"]];
+const PRESET_TAGS = ["叙事", "类型史", "文化符号", "设计机制", "世界观", "民俗历史", "沉浸感", "未来可做"];
+const STATUS = [["idea", "灵感中"], ["dig", "待深挖"], ["ready", "可以做了"], ["done", "已做"]];
+const STATUS_ORDER = { ready: 0, dig: 1, idea: 2, done: 3 };
+
+let filter = "all";
+let q = "";
+let editingId = null;
+let formType = "single";
+let selectedTags = new Set();
+
+const seed = [
+  /* ---- 系列 ---- */
+  {
+    id: uid(), form: "series", title: "「XX 里的一天」——世界一日系列",
+    body: "公式：选一个游戏里让人印象深刻的城市/地区，用「你」作主语带玩家走进去，讲这里普通的一天。不做切片，做沉浸式世界导览——代入感强，最贴写作的感官叙事能力。\n候选：罪恶之城（影之刃零·首发用）／夜之城（2077）／稻妻（原神）／冬堡（上古卷轴）…\n每个游戏都能做一集，天然长系列。",
+    tags: ["叙事", "沉浸感"], node: "", seriesOf: "", status: "ready", created: Date.now() - 86400000 * 5
+  },
+  {
+    id: uid(), form: "series", title: "「XX 类型发展史」——品类史系列",
+    body: "公式：一个品类的前世今生。中文视频圈基本空白，适合频道立起后的招牌系列——单期成本高，不做起号武器。\n候选：开放世界的发展／JRPG 的发展／银河城四十年（可踩 10-15 恶魔城节点）…",
+    tags: ["类型史"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 4
+  },
+
+  /* ---- 单点灵感 ---- */
+  {
+    id: uid(), form: "single", title: "为什么这么多游戏里都有「黄衣之王」？",
+    body: "一个从未存在过的剧本（《黄衣王》），怎么渗进了一百年的流行文化。克苏鲁／洛夫克拉夫特对游戏的影响线。\n人群太小众，不做出号，但独特、适合立人设。",
+    tags: ["文化符号"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 3
+  },
+  {
+    id: uid(), form: "single", title: "为什么游戏主线爱用「复仇 / 找人 / 救人」做原初动力？",
+    body: "三个都是「失去 → 夺回」结构，天然给玩家一个非做不可的理由。\n可以反着讲：哪些游戏用非传统动机——好奇心、责任、利他、探索？",
+    tags: ["叙事", "设计机制"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 3 + 3600000
+  },
+  {
+    id: uid(), form: "single", title: "「不玩游戏的人说：游戏体验是假的」",
+    body: "真实感的本质到底是什么？游戏里的「真实」是拟真（画面/物理），还是情感真实（我确实难过了）？\n可以成为一期内容的核心论点——标题、主体还不知道，先放着。",
+    tags: ["叙事", "设计机制"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 2
+  },
+  {
+    id: uid(), form: "single", title: "转场「闪光弹」：为什么切场景要闪白？",
+    body: "闪白是玩家普遍吐槽的点（刺眼），但它存在有功能原因：加载遮罩、场景切换的视觉缓冲；也有风格化用法：眩晕、闪回、死亡。\n问题核心：一个被所有人吐槽的设计，为什么活到了今天？功能 vs 美学的边界。",
+    tags: ["设计机制"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 2 + 3600000
+  },
+  {
+    id: uid(), form: "single", title: "为了增强沉浸感，游戏都做了哪些事？",
+    body: "清单式选题：第一人称、UI 精简/无 UI、环境音、无缝地图（无加载）、身体反馈（镜之边缘）、死亡叙事的魂系化……\n可以做成「沉浸感的工具箱」——每件工具背后是设计师的什么取舍。",
+    tags: ["设计机制", "沉浸感"], node: "", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 1
+  },
+
+  /* ---- 未来游戏 ---- */
+  {
+    id: uid(), form: "future", title: "黑神话钟馗（发售日未定 TBA）",
+    body: "已官宣。完全可以挖钟馗的故事、历史、民俗——中元节、判官、斩鬼传说、民间形象怎么一步步变成今天的样子。\n角度：游戏科学选钟馗意味着什么？「钟馗在中国文化里怎么变成现在这样的」。",
+    tags: ["民俗历史", "文化符号", "未来可做"], node: "TBA", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 5 + 7200000
+  },
+  {
+    id: uid(), form: "future", title: "地铁 2039（Metro 2039）",
+    body: "2027-02 发售，PS5/Xbox/PC。系列世界观入门：核战后的莫斯科地铁、阿尔乔姆的旅程、原著小说（德米特里·格鲁霍夫斯基）。\n角度：发售前做「地铁系列速览 / 故事前情」——讲的是什么故事。",
+    tags: ["世界观", "未来可做"], node: "2027-02", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 4 + 7200000
+  },
+  {
+    id: uid(), form: "future", title: "女神异闻录 4 重制（Persona 4 Revival）",
+    body: "2027-02-18 发售。P 系列世界观入门：荣格的人格面具（Persona）学说——Persona 在希腊语里就是「面具」；集体无意识、阴影（Shadow）；P4 的雾与电视世界的隐喻。\n角度：发售前做「P4 重制之前，先搞懂 Persona 是什么」。",
+    tags: ["世界观", "未来可做"], node: "2027-02-18", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 3 + 7200000
+  },
+  {
+    id: uid(), form: "future", title: "影之刃零——罪恶之城的一天",
+    body: "10-29 发售，Steam 愿望单 162 万全球第一，自带热度。\n切入：不讲主角，讲这座城里的普通人——药铺伙计、更夫、欠债的刀客。用「你」带观众走进城市的一天。首支视频目标，起号武器。",
+    tags: ["叙事", "沉浸感", "未来可做"], node: "2026-10-29", seriesOf: "「XX 里的一天」——世界一日系列", status: "ready", created: Date.now() - 86400000 * 5 + 10800000
+  },
+  {
+    id: uid(), form: "single", title: "银河城四十年",
+    body: "类型史系列的第一候选：恶魔城 × 银河战士四十年，一个品类怎么从一座城堡长成一整个世界。\n可踩节点：10-15 恶魔城相关。",
+    tags: ["类型史"], node: "10-15 可踩", seriesOf: "「XX 类型发展史」——品类史系列", status: "idea", created: Date.now() - 86400000 * 2 + 7200000
+  }
+];
+
+let items = load();
+
+function uid(){ return "i" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
+function load(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw){ const d = JSON.parse(raw); if (Array.isArray(d) && d.length) return d; }
+  } catch(e){}
+  return seed.slice();
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
+
+/* ---- render ---- */
+function renderStats(){
+  const n = { series: 0, single: 0, future: 0, ready: 0, total: items.length };
+  items.forEach(i => {
+    if (n[i.form] !== undefined) n[i.form]++;
+    if (i.status === "ready") n.ready++;
+  });
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><b>${n.total}</b> 条灵感</div>
+    <div class="stat"><b>${n.series}</b> 系列</div>
+    <div class="stat"><b>${n.single}</b> 单点</div>
+    <div class="stat"><b>${n.future}</b> 未来游戏</div>
+    <div class="stat hot"><b>${n.ready}</b> 可以做了</div>
+  `;
+}
+
+function renderTabs(){
+  const counts = { all: items.length };
+  FORMS.forEach(([k]) => counts[k] = items.filter(i => i.form === k).length);
+  document.getElementById("tabs").innerHTML =
+    [["all", "全部"]].concat(FORMS.map(([k, name]) => [k, name])).map(([k, name]) =>
+      `<button class="tab ${filter === k ? "active" : ""}" data-f="${k}">${name}<span class="n">${counts[k] || 0}</span></button>`
+    ).join("");
+}
+
+function esc(s){ return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+
+function statusTag(s){
+  const name = (STATUS.find(x => x[0] === s) || [])[1] || s;
+  if (s === "ready") return `<span class="tag status ready">✓ 可以做了</span>`;
+  if (s === "done") return `<span class="tag status">已做</span>`;
+  return `<span class="tag status">${name}</span>`;
+}
+
+function renderCards(){
+  let list = items.slice();
+  if (filter !== "all") list = list.filter(i => i.form === filter);
+  if (q){
+    const ql = q.toLowerCase();
+    list = list.filter(i =>
+      (i.title + " " + i.body + " " + (i.tags || []).join(" ") + " " + i.seriesOf).toLowerCase().includes(ql)
+    );
+  }
+  list.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (b.created || 0) - (a.created || 0));
+
+  const box = document.getElementById("cards");
+  if (!list.length){
+    box.innerHTML = `<div class="empty"><b>这里空着</b>${items.length ? "换个筛选或关键词试试" : "点右上角「丢一条灵感」开始——先记一句话就够了"}</div>`;
+    return;
+  }
+  box.innerHTML = list.map(i => {
+    const fMeta = FORMS.find(f => f[0] === i.form) || [];
+    const badges = `<span class="f-badge ${fMeta[2]}">${fMeta[1]}</span>`;
+    const tags = (i.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("");
+    const node = i.node ? `<span class="tag node">⌁ ${esc(i.node)}</span>` : "";
+    const series = i.seriesOf ? `<span class="tag series-of">◈ ${esc(i.seriesOf)}</span>` : "";
+    return `
+    <div class="card">
+      <div class="card-top">
+        ${badges}
+        <span class="card-title">${esc(i.title)}</span>
+        <div class="card-actions">
+          <button class="mini-btn" data-act="edit" data-id="${i.id}">编辑</button>
+          <button class="mini-btn danger" data-act="del" data-id="${i.id}">删除</button>
+        </div>
+      </div>
+      ${i.body ? `<div class="card-body">${esc(i.body)}</div>` : ""}
+      <div class="card-foot">${tags}${node}${series}${statusTag(i.status)}</div>
+    </div>`;
+  }).join("");
+}
+
+function render(){ renderStats(); renderTabs(); renderCards(); }
+
+/* ---- form ---- */
+function renderChips(){
+  document.getElementById("chips").innerHTML = PRESET_TAGS.map(t =>
+    `<span class="chip ${selectedTags.has(t) ? "active" : ""}" data-tag="${t}">${t}</span>`
+  ).join("");
+}
+document.getElementById("chips").onclick = e => {
+  const c = e.target.closest(".chip");
+  if (!c) return;
+  const t = c.dataset.tag;
+  selectedTags.has(t) ? selectedTags.delete(t) : selectedTags.add(t);
+  renderChips();
+};
+
+function refreshSeriesOptions(keep){
+  const sel = document.getElementById("seriesOf");
+  const series = items.filter(i => i.form === "series");
+  sel.innerHTML = `<option value="">— 不归属 —</option>` + series.map(s =>
+    `<option value="${esc(s.title)}" ${s.title === keep ? "selected" : ""}>${esc(s.title)}</option>`
+  ).join("");
+}
+
+function setFormType(t){
+  formType = t;
+  document.querySelectorAll(".form-opt").forEach(el => el.classList.toggle("active", el.dataset.f === t));
+  const titleLabel = document.getElementById("titleLabel");
+  const titleEl = document.getElementById("title");
+  const bodyLabel = document.getElementById("bodyLabel");
+  const bodyEl = document.getElementById("body");
+  const nodeF = document.getElementById("nodeField");
+  const seriesF = document.getElementById("seriesField");
+  if (t === "series"){
+    titleLabel.textContent = "系列叫什么（公式）";
+    titleEl.placeholder = "如：「XX 里的一天」——世界一日系列";
+    bodyLabel.textContent = "公式说明 + 候选（能套哪些游戏）";
+    bodyEl.placeholder = "公式怎么运作？候选：A / B / C……";
+    nodeF.style.display = "none";
+    seriesF.style.display = "none";
+  } else if (t === "single"){
+    titleLabel.textContent = "一句话灵感";
+    titleEl.placeholder = "如：为什么转场要闪白";
+    bodyLabel.textContent = "延伸想法（想到什么写什么）";
+    bodyEl.placeholder = "可能的角度、候选、素材……可以完全不成形";
+    nodeF.style.display = "block";
+    seriesF.style.display = "block";
+  } else {
+    titleLabel.textContent = "游戏名";
+    titleEl.placeholder = "如：地铁 2039";
+    bodyLabel.textContent = "可挖的角度 / 为什么值得做";
+    bodyEl.placeholder = "发售前可以讲什么：世界观？历史？文化背景？";
+    nodeF.style.display = "block";
+    seriesF.style.display = "block";
+  }
+}
+
+function openForm(item){
+  editingId = item ? item.id : null;
+  document.getElementById("modalTitle").textContent = item ? "编辑灵感" : "丢一条灵感";
+  document.getElementById("form").reset();
+  selectedTags = new Set();
+  setFormType(item ? item.form : "single");
+  refreshSeriesOptions(item ? item.seriesOf : "");
+  if (item){
+    document.getElementById("title").value = item.title || "";
+    document.getElementById("body").value = item.body || "";
+    document.getElementById("node").value = item.node || "";
+    document.getElementById("status").value = item.status || "idea";
+    selectedTags = new Set(item.tags || []);
+  }
+  renderChips();
+  document.getElementById("overlay").classList.add("show");
+  setTimeout(() => document.getElementById("title").focus(), 60);
+}
+function closeForm(){ document.getElementById("overlay").classList.remove("show"); }
+
+document.getElementById("formSelect").onclick = e => {
+  const o = e.target.closest(".form-opt");
+  if (o) setFormType(o.dataset.f);
+};
+
+document.getElementById("addBtn").onclick = () => openForm();
+document.getElementById("cancelBtn").onclick = closeForm;
+document.getElementById("overlay").onclick = e => { if (e.target === e.currentTarget) closeForm(); };
+
+document.getElementById("form").onsubmit = e => {
+  e.preventDefault();
+  const title = document.getElementById("title").value.trim();
+  if (!title){ toast("先写一句话再存"); return; }
+  const body = document.getElementById("body").value.trim();
+  const custom = document.getElementById("customTags").value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+  const tags = [...new Set([...selectedTags, ...custom])];
+  const status = document.getElementById("status").value;
+  const node = document.getElementById("node").value.trim();
+  const seriesOf = formType === "series" ? "" : document.getElementById("seriesOf").value;
+
+  if (editingId){
+    const it = items.find(x => x.id === editingId);
+    if (it){
+      const oldTitle = it.title;
+      Object.assign(it, { form: formType, title, body, tags, node, seriesOf, status });
+      // 系列改名 → 子条目归属跟着改
+      if (formType === "series" && oldTitle !== title){
+        items.forEach(x => { if (x.seriesOf === oldTitle) x.seriesOf = title; });
+      }
+    }
+    toast("已更新");
+  } else {
+    items.push({ id: uid(), form: formType, title, body, tags, node, seriesOf, status, created: Date.now() });
+    toast("记下了，好样的");
+  }
+  save(); closeForm(); render();
+};
+
+document.getElementById("cards").onclick = e => {
+  const btn = e.target.closest(".mini-btn");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  if (btn.dataset.act === "del"){
+    const it = items.find(x => x.id === id);
+    if (it && confirm(`删除这条灵感？\n「${it.title}」`)){
+      items = items.filter(x => x.id !== id);
+      save(); render(); toast("已删除");
+    }
+  } else if (btn.dataset.act === "edit"){
+    openForm(items.find(x => x.id === id));
+  }
+};
+
+document.getElementById("tabs").onclick = e => {
+  const b = e.target.closest(".tab");
+  if (b){ filter = b.dataset.f; render(); }
+};
+document.getElementById("q").oninput = e => { q = e.target.value; renderCards(); };
+
+document.getElementById("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "游戏灵感素材库备份_" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("已导出备份文件");
+};
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeForm(); });
+
+function showErr(msg, e){
+  const box = document.getElementById("global-err");
+  box.style.display = "block";
+  box.innerHTML = "<b>页面出错了：</b><br>" + esc(msg) + (e && e.stack ? "<br><small>" + esc(e.stack).replace(/\n/g, "<br>") + "</small>" : "");
+}
+
+try {
+  render();
+} catch(e){
+  showErr(e.message, e);
+  console.error(e);
+}
+
+window.onerror = function(msg, url, line, col, err){
+  showErr(msg + " (line " + line + ":" + col + ")", err);
+};
+window.onunhandledrejection = function(e){
+  showErr("未处理 Promise: " + (e.reason && e.reason.message ? e.reason.message : String(e.reason)), e.reason);
+};
+</script>
+</body>
+</html>
