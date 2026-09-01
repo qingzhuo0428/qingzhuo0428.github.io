@@ -78,7 +78,7 @@
     border-radius: 2px 2px 0 0;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; flex: none;
-    padding: 8px 0;
+    padding: 8px 0 36px;
     white-space: nowrap; overflow: hidden;
     transition: opacity .15s;
   }
@@ -100,7 +100,7 @@
   .spine.dim { opacity: .16; }
   .spine.add {
     border: 1px dashed #c8c2b5; border-bottom: none; color: var(--ink-3);
-    height: 100px; font-size: 16px; font-family: inherit;
+    height: 128px; font-size: 16px; font-family: inherit;
   }
   .empty-hint { font-size: 12px; color: var(--ink-3); padding-bottom: 8px; font-family: inherit; }
 
@@ -209,12 +209,12 @@ function lenOf(id) {
   return LENS[0];
 }
 function spineHeight(it) {
-  if (it.state === "idea") return 96;
+  if (it.state === "idea") return 128;
   if (it.state === "done") return 156;
   var w = parseInt(it.words, 10) || 0;
   var t = parseInt(it.target, 10) || lenOf(it.len).target;
   var r = Math.max(0, Math.min(1, w / t));
-  return Math.round(84 + r * 72);
+  return Math.max(128, Math.round(84 + r * 72));
 }
 function pct(it) {
   var w = parseInt(it.words, 10) || 0;
@@ -256,7 +256,7 @@ function render() {
       var nb = BANDS[it.len] || 1;
       var bandHtml = "";
       for (var b = 0; b < nb; b++) {
-        bandHtml += '<span class="band" style="top:' + (12 + b * 8) + 'px"></span>';
+        bandHtml += '<span class="band" style="bottom:' + (10 + b * 8) + 'px"></span>';
       }
       html += '<div class="spine ' + st.cls + dim + sel + '" data-id="' + it.id + '"' +
         ' style="width:' + lz.w + 'px;height:' + spineHeight(it) + 'px"' +
