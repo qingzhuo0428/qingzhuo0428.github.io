@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小说书架</title>
+<title>文字生涯</title>
 <link rel="icon" href="icon-novel-v2.png">
 <link rel="apple-touch-icon" href="icon-novel-v2.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="小说书架">
+<meta name="apple-mobile-web-app-title" content="文字生涯">
 <style>
   :root {
     --bg: #faf7f0;
@@ -57,17 +57,17 @@
     border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
   }
 
-  .shelf-block { margin-bottom: 30px; }
+  .shelf-block { margin-bottom: 34px; }
   .shelf-label {
     display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;
     font-size: 12px; color: var(--ink-3); letter-spacing: .08em;
   }
   .shelf-label b { font-family: var(--serif); font-size: 15px; color: var(--ink); font-weight: 500; letter-spacing: .04em; }
   .shelf-row {
-    display: flex; align-items: flex-end; gap: 7px;
-    border-bottom: 3px solid var(--shelf);
-    padding: 0 12px; min-height: 182px;
-    overflow-x: auto; overflow-y: hidden;
+    display: flex; flex-wrap: wrap;
+    align-items: flex-end; align-content: flex-start;
+    column-gap: 8px; row-gap: 27px;
+    padding: 0 12px 3px; min-height: 160px;
   }
   .spine {
     position: relative;
@@ -82,6 +82,12 @@
     padding: 36px 0 16px;
     white-space: nowrap; overflow: hidden;
     transition: opacity .15s;
+    /* 每根书脊自带一块搁板，换行后自动形成第二层书架；
+       box-shadow 不受自身 overflow:hidden 裁剪，左右各补 4px 正好接上 8px 的间距 */
+    box-shadow:
+      0 3px 0 0 var(--shelf),
+      4px 3px 0 0 var(--shelf),
+      -4px 3px 0 0 var(--shelf);
   }
   .col { writing-mode: vertical-rl; }
   .spine.done { background: #232321; color: #f3efe4; }
@@ -134,15 +140,14 @@
   footer { margin-top: 34px; font-size: 11px; color: var(--ink-3); line-height: 1.8; }
   @media (max-width: 600px) {
     body { padding: 26px 14px 80px; }
-    .shelf-row { min-height: 172px; }
+    .shelf-row { min-height: 155px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>小说书架</h1>
-    <p class="sub">想写的立起来，写完的上架</p>
+    <h1>文字生涯</h1>
   </header>
 
   <div class="stats" id="stats"></div>
@@ -417,7 +422,7 @@ document.getElementById("export").onclick = function () {
   var blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "小说书架备份-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.download = "文字生涯备份-" + new Date().toISOString().slice(0, 10) + ".json";
   a.click();
 };
 document.getElementById("import").onclick = function () {
