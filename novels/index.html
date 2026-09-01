@@ -95,7 +95,7 @@
     position: absolute; left: 5px; right: 5px; height: 2px;
     background: #c9a961; border-radius: 1px;
   }
-  .spine.idea .band { background: #b3ada1; }
+  .spine.idea .band { background: #9b968f; }
   .spine.sel { outline: 2px solid var(--ink); outline-offset: 2px; }
   .spine.dim { opacity: .16; }
   .spine.add {
@@ -210,9 +210,11 @@ function lenOf(id) {
 }
 function spineHeight(it) {
   var w = parseInt(it.words, 10) || 0;
-  if (w <= 0) return 96;
-  // 高度按字数线性映射（与篇幅目标脱钩，5000字 < 7000字 一眼能看出）
-  return Math.max(96, Math.min(156, 96 + Math.round(w / 18000 * 60)));
+  var wordH = w <= 0 ? 96 : Math.max(96, Math.min(156, 96 + Math.round(w / 18000 * 60)));
+  // 标题兜底：字符多就长高，防止竖排文字被切
+  var n = (it.title || "").length;
+  var titleH = n <= 0 ? 96 : Math.min(156, 36 + n * 16 + 8 + 6);
+  return Math.max(wordH, titleH);
 }
 function pct(it) {
   var w = parseInt(it.words, 10) || 0;
