@@ -209,12 +209,10 @@ function lenOf(id) {
   return LENS[0];
 }
 function spineHeight(it) {
-  if (it.state === "idea") return 128;
-  if (it.state === "done") return 156;
   var w = parseInt(it.words, 10) || 0;
-  var t = parseInt(it.target, 10) || lenOf(it.len).target;
-  var r = Math.max(0, Math.min(1, w / t));
-  return Math.max(128, Math.round(84 + r * 72));
+  if (w <= 0) return 96;
+  // 高度按字数线性映射（与篇幅目标脱钩，5000字 < 7000字 一眼能看出）
+  return Math.max(96, Math.min(156, 96 + Math.round(w / 18000 * 60)));
 }
 function pct(it) {
   var w = parseInt(it.words, 10) || 0;
@@ -294,9 +292,11 @@ function detailHTML(it) {
   });
   s += '</select></div>';
   s += '<div class="f-words"><label>字数</label><input data-f="words" type="number" min="0" value="' + esc(it.words) + '"></div>';
-  s += '<div class="f-words"><label>目标字数</label><input data-f="target" type="number" min="0" value="' + esc(it.target) + '" placeholder="' + lenOf(it.len).target + '"></div>';
   s += '</div>';
-  if (it.state !== "idea") {
+  if (it.state === "done") {
+    s += '<div class="row"><div class="f-words"><label>完稿时间</label><input data-f="finishedDate" type="date" value="' + esc(it.finishedDate) + '"></div></div>';
+  } else if (it.state !== "idea") {
+    s += '<div class="row"><div class="f-words"><label>目标字数</label><input data-f="target" type="number" min="0" value="' + esc(it.target) + '" placeholder="' + lenOf(it.len).target + '"></div></div>';
     s += '<div class="row"><div class="full"><label>进度</label>' +
       '<div style="display:flex;align-items:center;gap:10px">' +
       '<div style="flex:1;height:5px;background:var(--bg);border:1px solid var(--line);border-radius:3px;overflow:hidden">' +
