@@ -76,12 +76,14 @@
     font-family: var(--serif);
     font-size: 14px; letter-spacing: .12em;
     border-radius: 2px 2px 0 0;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     cursor: pointer; flex: none;
-    padding: 36px 0 8px;
+    padding: 36px 0 16px;
     white-space: nowrap; overflow: hidden;
     transition: opacity .15s;
   }
+  .col { writing-mode: vertical-rl; }
   .spine.done { background: #232321; color: #f3efe4; }
   .spine.doing {
     background: transparent; color: #232321;
@@ -208,13 +210,49 @@ function lenOf(id) {
   for (var i = 0; i < LENS.length; i++) if (LENS[i].id === id) return LENS[i];
   return LENS[0];
 }
+var PAD_TOP = 36;   // 金带区
+var PAD_BOTTOM = 16; // 底部留白，防字符贴到书架横杠
+
+function titleFont(n) {
+  if (n >= 26) return 9;
+  if (n >= 20) return 10;
+  if (n >= 10) return 11;
+  if (n >= 7) return 12;
+  if (n >= 5) return 13;
+  return 14;
+}
+
 function spineHeight(it) {
   var w = parseInt(it.words, 10) || 0;
   var wordH = w <= 0 ? 96 : Math.max(96, Math.min(156, 96 + Math.round(w / 18000 * 60)));
-  // 标题兜底：字符多就长高，防止竖排文字被切
   var n = (it.title || "").length;
-  var titleH = n <= 0 ? 96 : Math.min(156, 36 + n * 16 + 8 + 6);
+  var fs = titleFont(n);
+  var titleH = n <= 0 ? 96 : Math.min(156, PAD_TOP + n * fs * 1.12 + PAD_BOTTOM + 6);
   return Math.max(wordH, titleH);
+}
+
+// 竖排排版：算字号 + 需要几列（列多了书脊加宽）
+function titleLayout(it, h) {
+  var n = (it.title || "").length;
+  if (n <= 0) return { fs: 14, w: 36, cols: 1 };
+  var fs = titleFont(n);
+  var charW = fs * 1.12;
+  var avail = h - PAD_TOP - PAD_BOTTOM;
+  var perCol = Math.max(1, Math.floor(avail / charW));
+  var cols = Math.min(3, Math.ceil(n / perCol));
+  var w = Math.max(36, cols * (fs + 7) + 8);
+  return { fs: fs, w: w, cols: cols };
+}
+
+// 把标题切成若干列（JS 切，不依赖 CSS 自动换行，结果确定）
+function splitTitle(title, cols) {
+  var t = String(title || "");
+  var n = t.length;
+  if (n <= 0 || cols <= 1) return [t];
+  var per = Math.ceil(n / cols);
+  var out = [];
+  for (var i = 0; i < n; i += per) out.push(t.slice(i, i + per));
+  return out;
 }
 function pct(it) {
   var w = parseInt(it.words, 10) || 0;
@@ -250,7 +288,6 @@ function render() {
       html += '<div class="empty-hint">这一层还空着</div>';
     }
     list.forEach(function (it) {
-      var lz = lenOf(it.len);
       var dim = (filter !== "all" && it.len !== filter) ? " dim" : "";
       var sel = (openId === it.id) ? " sel" : "";
       var nb = BANDS[it.len] || 1;
@@ -258,10 +295,15 @@ function render() {
       for (var b = 0; b < nb; b++) {
         bandHtml += '<span class="band" style="top:' + (10 + b * 8) + 'px"></span>';
       }
+      var h = spineHeight(it);
+      var lay = titleLayout(it, h);
+      var titleHtml = splitTitle(it.title, lay.cols).map(function (p) {
+        return '<span class="col">' + esc(p) + '</span>';
+      }).join("");
       html += '<div class="spine ' + st.cls + dim + sel + '" data-id="' + it.id + '"' +
-        ' style="width:' + lz.w + 'px;height:' + spineHeight(it) + 'px"' +
+        ' style="width:' + lay.w + 'px;height:' + h + 'px;font-size:' + lay.fs + 'px"' +
         ' title="' + esc(it.title) + (it.words ? " · " + it.words + "字" : "") + '">' +
-        esc(it.title) + bandHtml + '</div>';
+        titleHtml + bandHtml + '</div>';
     });
     html += '<div class="spine add" data-add="' + st.id + '">＋</div>';
     html += '</div>';
