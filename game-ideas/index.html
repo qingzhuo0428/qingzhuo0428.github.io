@@ -110,6 +110,8 @@
   }
   .tag.node { background: #f7ecd9; color: var(--warn); border-color: transparent; font-weight: 500; }
   .tag.series-of { background: #f0edf8; color: #5b4a94; border-color: transparent; }
+  .tag.game { background: #e9f0f5; color: #2f5570; border-color: transparent; font-weight: 500; }
+  .mini-btn.move { font-size: 13px; padding: 4px 7px; letter-spacing: 0; }
   .tag.status { background: var(--bg); }
   .tag.status.ready { background: #e4efe7; color: var(--ok); border-color: transparent; }
 
@@ -211,15 +213,11 @@
       <div class="forms" id="formSelect">
         <div class="form-opt" data-f="series">
           <span class="t">系列</span>
-          <span class="d">一个能套很多游戏的框架</span>
+          <span class="d">能做很多期视频的系列</span>
         </div>
         <div class="form-opt active" data-f="single">
           <span class="t">单点灵感</span>
           <span class="d">一句话论点，主体还没想好</span>
-        </div>
-        <div class="form-opt" data-f="future">
-          <span class="t">未来游戏</span>
-          <span class="d">绑定某个还没发售的游戏</span>
         </div>
       </div>
 
@@ -230,6 +228,11 @@
       <div class="field">
         <label id="bodyLabel">延伸想法（想到什么写什么）</label>
         <textarea id="body" placeholder="可能的角度、候选、素材、标题备选……可以完全不成形"></textarea>
+      </div>
+
+      <div class="field">
+        <label>游戏名称（这条涉及的游戏，逗号分隔）</label>
+        <input id="games" placeholder="如：影之刃零、女神异闻录4" maxlength="80">
       </div>
 
       <div class="field">
@@ -271,11 +274,11 @@
 <div id="global-err" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#b3382c;color:#fff;padding:14px 22px;border-radius:12px;font-size:13px;max-width:80%;z-index:30;box-shadow:0 8px 30px rgba(0,0,0,.2);line-height:1.6;"></div>
 
 <script>
-const KEY = "game-idea-bank-v2";
-const FORMS = [["series", "系列", "f-series"], ["single", "单点灵感", "f-single"], ["future", "未来游戏", "f-future"]];
-const PRESET_TAGS = ["叙事", "类型史", "文化符号", "设计机制", "世界观", "民俗历史", "沉浸感", "未来可做"];
+const KEY = "game-idea-bank-v3";
+const OLD_KEY = "game-idea-bank-v2";
+const FORMS = [["series", "系列", "f-series"], ["single", "单点灵感", "f-single"]];
+const PRESET_TAGS = ["叙事", "类型史"];
 const STATUS = [["idea", "灵感中"], ["dig", "待深挖"], ["ready", "可以做了"], ["done", "已做"]];
-const STATUS_ORDER = { ready: 0, dig: 1, idea: 2, done: 3 };
 
 let filter = "all";
 let q = "";
@@ -325,22 +328,22 @@ const seed = [
 
   /* ---- 未来游戏 ---- */
   {
-    id: uid(), form: "future", title: "黑神话钟馗（发售日未定 TBA）",
+    id: uid(), form: "single", games: "黑神话：钟馗", title: "黑神话钟馗（发售日未定 TBA）",
     body: "已官宣。完全可以挖钟馗的故事、历史、民俗——中元节、判官、斩鬼传说、民间形象怎么一步步变成今天的样子。\n角度：游戏科学选钟馗意味着什么？「钟馗在中国文化里怎么变成现在这样的」。",
     tags: ["民俗历史", "文化符号", "未来可做"], node: "TBA", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 5 + 7200000
   },
   {
-    id: uid(), form: "future", title: "地铁 2039（Metro 2039）",
+    id: uid(), form: "single", games: "地铁 2039", title: "地铁 2039（Metro 2039）",
     body: "2027-02 发售，PS5/Xbox/PC。系列世界观入门：核战后的莫斯科地铁、阿尔乔姆的旅程、原著小说（德米特里·格鲁霍夫斯基）。\n角度：发售前做「地铁系列速览 / 故事前情」——讲的是什么故事。",
     tags: ["世界观", "未来可做"], node: "2027-02", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 4 + 7200000
   },
   {
-    id: uid(), form: "future", title: "女神异闻录 4 重制（Persona 4 Revival）",
+    id: uid(), form: "single", games: "女神异闻录 4 重制", title: "女神异闻录 4 重制（Persona 4 Revival）",
     body: "2027-02-18 发售。P 系列世界观入门：荣格的人格面具（Persona）学说——Persona 在希腊语里就是「面具」；集体无意识、阴影（Shadow）；P4 的雾与电视世界的隐喻。\n角度：发售前做「P4 重制之前，先搞懂 Persona 是什么」。",
     tags: ["世界观", "未来可做"], node: "2027-02-18", seriesOf: "", status: "idea", created: Date.now() - 86400000 * 3 + 7200000
   },
   {
-    id: uid(), form: "future", title: "影之刃零——罪恶之城的一天",
+    id: uid(), form: "single", games: "影之刃零", title: "影之刃零——罪恶之城的一天",
     body: "10-29 发售，Steam 愿望单 162 万全球第一，自带热度。\n切入：不讲主角，讲这座城里的普通人——药铺伙计、更夫、欠债的刀客。用「你」带观众走进城市的一天。首支视频目标，起号武器。",
     tags: ["叙事", "沉浸感", "未来可做"], node: "2026-10-29", seriesOf: "「XX 里的一天」——世界一日系列", status: "ready", created: Date.now() - 86400000 * 5 + 10800000
   },
@@ -358,6 +361,20 @@ function load(){
   try {
     const raw = localStorage.getItem(KEY);
     if (raw){ const d = JSON.parse(raw); if (Array.isArray(d) && d.length) return d; }
+    // v2 老数据迁移：去掉「未来游戏」这个形态，一并转成单点灵感
+    const old = localStorage.getItem(OLD_KEY);
+    if (old){
+      const d = JSON.parse(old);
+      if (Array.isArray(d) && d.length){
+        const migrated = d.map(x => ({
+          ...x,
+          form: x.form === "future" ? "single" : x.form,
+          games: x.games || ""
+        }));
+        localStorage.setItem(KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+    }
   } catch(e){}
   return seed.slice();
 }
@@ -365,16 +382,17 @@ function save(){ localStorage.setItem(KEY, JSON.stringify(items)); }
 
 /* ---- render ---- */
 function renderStats(){
-  const n = { series: 0, single: 0, future: 0, ready: 0, total: items.length };
+  const n = { series: 0, single: 0, done: 0, ready: 0, total: items.length };
   items.forEach(i => {
     if (n[i.form] !== undefined) n[i.form]++;
     if (i.status === "ready") n.ready++;
+    if (i.status === "done") n.done++;
   });
   document.getElementById("stats").innerHTML = `
     <div class="stat"><b>${n.total}</b> 条灵感</div>
     <div class="stat"><b>${n.series}</b> 系列</div>
     <div class="stat"><b>${n.single}</b> 单点</div>
-    <div class="stat"><b>${n.future}</b> 未来游戏</div>
+    <div class="stat"><b>${n.done}</b> 已做</div>
     <div class="stat hot"><b>${n.ready}</b> 可以做了</div>
   `;
 }
@@ -397,40 +415,58 @@ function statusTag(s){
   return `<span class="tag status">${name}</span>`;
 }
 
+let currentList = [];
+
+function moveItem(id, dir){
+  const idx = currentList.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const t = dir === "up" ? idx - 1 : idx + 1;
+  if (t < 0 || t >= currentList.length) return;
+  const A = currentList[idx], B = currentList[t];
+  const ia = items.indexOf(A), ib = items.indexOf(B);
+  if (ia < 0 || ib < 0) return;
+  items[ia] = B; items[ib] = A;
+  save(); render();
+}
+
 function renderCards(){
   let list = items.slice();
   if (filter !== "all") list = list.filter(i => i.form === filter);
   if (q){
     const ql = q.toLowerCase();
     list = list.filter(i =>
-      (i.title + " " + i.body + " " + (i.tags || []).join(" ") + " " + i.seriesOf).toLowerCase().includes(ql)
+      (i.title + " " + i.body + " " + (i.tags || []).join(" ") + " " + (i.seriesOf || "") + " " + (i.games || "")).toLowerCase().includes(ql)
     );
   }
-  list.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (b.created || 0) - (a.created || 0));
+  currentList = list;
 
   const box = document.getElementById("cards");
   if (!list.length){
     box.innerHTML = `<div class="empty"><b>这里空着</b>${items.length ? "换个筛选或关键词试试" : "点右上角「丢一条灵感」开始——先记一句话就够了"}</div>`;
     return;
   }
-  box.innerHTML = list.map(i => {
-    const fMeta = FORMS.find(f => f[0] === i.form) || [];
+  box.innerHTML = list.map((i, idx) => {
+    const fMeta = FORMS.find(f => f[0] === i.form) || FORMS[1];
     const badges = `<span class="f-badge ${fMeta[2]}">${fMeta[1]}</span>`;
     const tags = (i.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("");
     const node = i.node ? `<span class="tag node">⌁ ${esc(i.node)}</span>` : "";
     const series = i.seriesOf ? `<span class="tag series-of">◈ ${esc(i.seriesOf)}</span>` : "";
+    const gm = i.games ? `<span class="tag game">▣ ${esc(i.games)}</span>` : "";
+    const up = idx > 0 ? `<button class="mini-btn move" data-act="up" data-id="${i.id}" title="上移">↑</button>` : "";
+    const down = idx < list.length - 1 ? `<button class="mini-btn move" data-act="down" data-id="${i.id}" title="下移">↓</button>` : "";
     return `
     <div class="card">
       <div class="card-top">
         ${badges}
         <span class="card-title">${esc(i.title)}</span>
         <div class="card-actions">
+          ${up}${down}
           <button class="mini-btn" data-act="edit" data-id="${i.id}">编辑</button>
           <button class="mini-btn danger" data-act="del" data-id="${i.id}">删除</button>
         </div>
       </div>
       ${i.body ? `<div class="card-body">${esc(i.body)}</div>` : ""}
-      <div class="card-foot">${tags}${node}${series}${statusTag(i.status)}</div>
+      <div class="card-foot">${gm}${tags}${node}${series}${statusTag(i.status)}</div>
     </div>`;
   }).join("");
 }
@@ -471,8 +507,8 @@ function setFormType(t){
   if (t === "series"){
     titleLabel.textContent = "系列叫什么（公式）";
     titleEl.placeholder = "如：「XX 里的一天」——世界一日系列";
-    bodyLabel.textContent = "公式说明 + 候选（能套哪些游戏）";
-    bodyEl.placeholder = "公式怎么运作？候选：A / B / C……";
+    bodyLabel.textContent = "公式说明 + 能做哪几期";
+    bodyEl.placeholder = "公式怎么运作？能拆成哪几期？候选：A / B / C……";
     nodeF.style.display = "none";
     seriesF.style.display = "none";
   } else if (t === "single"){
@@ -483,10 +519,10 @@ function setFormType(t){
     nodeF.style.display = "block";
     seriesF.style.display = "block";
   } else {
-    titleLabel.textContent = "游戏名";
-    titleEl.placeholder = "如：地铁 2039";
-    bodyLabel.textContent = "可挖的角度 / 为什么值得做";
-    bodyEl.placeholder = "发售前可以讲什么：世界观？历史？文化背景？";
+    titleLabel.textContent = "一句话灵感";
+    titleEl.placeholder = "如：为什么转场要闪白";
+    bodyLabel.textContent = "延伸想法（想到什么写什么）";
+    bodyEl.placeholder = "可能的角度、候选、素材……可以完全不成形";
     nodeF.style.display = "block";
     seriesF.style.display = "block";
   }
@@ -503,6 +539,7 @@ function openForm(item){
     document.getElementById("title").value = item.title || "";
     document.getElementById("body").value = item.body || "";
     document.getElementById("node").value = item.node || "";
+    document.getElementById("games").value = item.games || "";
     document.getElementById("status").value = item.status || "idea";
     selectedTags = new Set(item.tags || []);
   }
@@ -530,13 +567,14 @@ document.getElementById("form").onsubmit = e => {
   const tags = [...new Set([...selectedTags, ...custom])];
   const status = document.getElementById("status").value;
   const node = document.getElementById("node").value.trim();
+  const games = document.getElementById("games").value.trim();
   const seriesOf = formType === "series" ? "" : document.getElementById("seriesOf").value;
 
   if (editingId){
     const it = items.find(x => x.id === editingId);
     if (it){
       const oldTitle = it.title;
-      Object.assign(it, { form: formType, title, body, tags, node, seriesOf, status });
+      Object.assign(it, { form: formType, title, body, tags, node, games, seriesOf, status });
       // 系列改名 → 子条目归属跟着改
       if (formType === "series" && oldTitle !== title){
         items.forEach(x => { if (x.seriesOf === oldTitle) x.seriesOf = title; });
@@ -544,7 +582,7 @@ document.getElementById("form").onsubmit = e => {
     }
     toast("已更新");
   } else {
-    items.push({ id: uid(), form: formType, title, body, tags, node, seriesOf, status, created: Date.now() });
+    items.unshift({ id: uid(), form: formType, title, body, tags, node, games, seriesOf, status, created: Date.now() });
     toast("记下了，好样的");
   }
   save(); closeForm(); render();
@@ -554,7 +592,9 @@ document.getElementById("cards").onclick = e => {
   const btn = e.target.closest(".mini-btn");
   if (!btn) return;
   const id = btn.dataset.id;
-  if (btn.dataset.act === "del"){
+  if (btn.dataset.act === "up" || btn.dataset.act === "down"){
+    moveItem(id, btn.dataset.act);
+  } else if (btn.dataset.act === "del"){
     const it = items.find(x => x.id === id);
     if (it && confirm(`删除这条灵感？\n「${it.title}」`)){
       items = items.filter(x => x.id !== id);
